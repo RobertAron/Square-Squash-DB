@@ -1,5 +1,5 @@
 reset-local:
-	@node ./BuildScripts/SetupDB.js
+	@node -e 'require(./BuildScripts/SetupDB.js).restartDB()'
 deploy:
 	@sls deploy --aws-profile robert
 remove:
