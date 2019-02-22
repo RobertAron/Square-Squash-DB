@@ -13,14 +13,24 @@ CREATE TABLE player_data.players(
   PRIMARY KEY (ID)
 )`
 
-export const makeDb = async (event,context) => {
+export const makeDb = async (event, context) => {
   console.log("called to create db")
   const result = await pool.query(doesDBExist)
-  if (result[0].length > 0) {
-    await pool.query(createDB)
-    await pool.query(createPlayerTable)
+  if (result[0].length === 0) {
+    const conn = await pool.getConnection()
+    try {
+      await conn.beginTransaction()
+      await conn.query(createDB)
+      await pool.query(createPlayerTable)
+      console.log("done creating db")
+      await conn.commit()
+    }
+    catch (err) {
+      await conn.rollback()
+    }
+    await conn.release()
   }
-  else{
+  else {
     console.log("db had already been created")
   }
 }

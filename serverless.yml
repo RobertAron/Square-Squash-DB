@@ -19,6 +19,8 @@ provider:
   runtime: nodejs8.10
   stage: dev
   region: us-east-1
+  memorySize: 256
+  timeout: 1
   # TODO: double check this....
   # https://github.com/mugglmenzel/serverless-examples-cached-rds-ws/blob/master/serverless.yml
   iamRoleStatements:
@@ -50,19 +52,19 @@ provider:
 functions:
   UpdateUser:
     handler: API/UpdateUser.updateUser
-    timeout: 1
     events:
       - http:
           path: score
           method: post
   GetTopScores:
     handler: API/GetTopScores.getTopScores
-    timeout: 1
     events:
       - http:
           path: score
           method: get
-  
+  MakeDb:
+    handler: API/MakeDb.makeDb
+
 resources:
   Resources:
     # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html
