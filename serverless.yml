@@ -19,32 +19,70 @@ provider:
   runtime: nodejs8.10
   stage: dev
   region: us-east-1
-  # To load environment variables externally
-  # rename env.example to env.yml and uncomment
-  # the following line. Also, make sure to not
-  # commit your env.yml.
-  #
+  # TODO: double check this....
+  # https://github.com/mugglmenzel/serverless-examples-cached-rds-ws/blob/master/serverless.yml
+  iamRoleStatements:
+  - Effect: "Allow"
+    Action:
+      - ec2:CreateNetworkInterface
+      - ec2:DescribeNetworkInterfaces
+      - ec2:DeleteNetworkInterface
+    Resource: "*"
+  # Connection to DB params - env variable to all functions
+  environment:
+    HOST: { "Fn::GetAtt" : ["ScoresTable", "Endpoint.Address" ]}
+    PORT: {"Fn::GetAtt" : ["ScoresTable", "Endpoint.Port" ]}
+    USER: ${self:custom.environment.DB_USER}
+    PASSWORD: ${self:custom.environment.DB_PASS}
+  #Mega bleh
+  vpc:
+    securityGroupIds:
+      - sg-51b8021e
+    subnetIds:
+      - subnet-62c84805
+      - subnet-922d579d
+      - subnet-b8fd70e4
+      - subnet-a3c2169d
+      - subnet-b22b7bf8
+      - subnet-d7d35cf9
+
 
 functions:
-  editPlayer:
-    handler: API/EditPlayer.UpdateUser
+  UpdateUser:
+    handler: API/UpdateUser.updateUser
+    timeout: 1
     events:
       - http:
-          path: hello
+          path: score
           method: post
-# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html
-# https://serverless-stack.com/chapters/configure-dynamodb-in-serverless.html
+  GetTopScores:
+    handler: API/GetTopScores.getTopScores
+    timeout: 1
+    events:
+      - http:
+          path: score
+          method: get
+  
 resources:
   Resources:
+    # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html
+    # https://serverless-stack.com/chapters/configure-dynamodb-in-serverless.html
     ScoresTable:
       Type: AWS::RDS::DBInstance
       Properties: 
         DBName: SquareSquashDB
         DBInstanceClass: db.t2.micro
-        DBInstanceIdentifier: SquareSquashDB
+        DBInstanceIdentifier: SquareSquashDBS
         Engine: MySQL
         EngineVersion: "5.6.40"
         MasterUsername: ${self:custom.environment.DB_USER}
         MasterUserPassword: ${self:custom.environment.DB_PASS}
         DeletionProtection: false
         AllocatedStorage: "20"
+  Outputs:
+    MyDbEndpoint:
+      Description: The Endpoint for the MYSQL server.
+      Value: { "Fn::GetAtt" : ["ScoresTable", "Endpoint.Address" ]}
+    MyDbPort:
+      Description: The Port for the MYSQL server.
+      Value: { "Fn::GetAtt" : ["ScoresTable", "Endpoint.Port" ]}
