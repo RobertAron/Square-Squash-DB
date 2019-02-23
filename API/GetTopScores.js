@@ -20,10 +20,9 @@ function getTopTen() {
 
 
 export const getTopScores = async (event, context) => {
-  const playerID = pool.escape(event.playerID)
+  const playerID = pool.escape(event.pathParameters.id)
   const playerData = []
   const conn = await pool.getConnection()
-
   await conn.beginTransaction()
   try {
     const topTenData = await conn.query(getTopTen())
@@ -43,14 +42,16 @@ export const getTopScores = async (event, context) => {
         position: player.position
       }
     })
+    console.log('returning success message!')
     return {
       statusCode: 200,
-      body: {
+      body: JSON.stringify({
         scores: returnScores
-      }
+      })
     }
   }
   catch (err) {
+    console.log(err)
     console.error(`An error occurred. ${err}`)
     await conn.rollback()
     await conn.release()

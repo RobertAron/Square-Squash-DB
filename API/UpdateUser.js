@@ -22,16 +22,15 @@ function updatePlayer(uuid,score,name){
 }
 
 export const updateUser = async (event,context) =>{
-  console.log("update user called")
-  const playerID = pool.escape(event.playerID)
-  const playerName = pool.escape(event.playerName) 
-  const playerScore = pool.escape(event.playerScore)
-  console.log("waiting for connection")
+  console.log(event.body)
+  const newData = JSON.parse(event.body)
+  const playerID = pool.escape(newData.playerID)
+  const playerName = pool.escape(newData.playerName) 
+  const playerScore = pool.escape(newData.playerScore)
+  console.log(playerID,playerName,playerScore)
   const conn = await pool.getConnection()
-  console.log("waiting for transaction")
   await conn.beginTransaction()
   try{
-    console.log("waiting for does player exist")
     const playerExist = await conn.query(doesPlayerExist(playerID))
     if(playerExist[0][0].isPresent===0){
       console.log(`Adding player to Db ${playerID}`)

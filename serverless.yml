@@ -60,7 +60,7 @@ functions:
     handler: API/GetTopScores.getTopScores
     events:
       - http:
-          path: score
+          path: score/{id}
           method: get
   MakeDb:
     handler: API/MakeDb.makeDb

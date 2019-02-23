@@ -53,7 +53,9 @@ it('Shows 11 players on player not in top 10',async () =>{
   await Promise.all(initialPlayerPromises)
   await updateUser.updateUser(specialPlayer,context)
   const event = {
-    playerID : specialPlayer.playerID
+    pathParameters: {
+      specialPlayer: playerID
+    }
   }
   const topScores = await getTopScores.getTopScores(event,context)
   expect(topScores.body.scores.length).toBe(11)
