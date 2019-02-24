@@ -27,7 +27,8 @@ export const getTopScores = async (event, context) => {
   try {
     const topTenData = await conn.query(getTopTen())
     playerData.push(...topTenData[0])
-    if(playerData.length>=10){
+    if(playerData.length>=10 && playerData.filter(ele=>ele.ID===event.pathParameters.id).length!==1){
+      console.log(playerData)
       if(playerData.findIndex(ele=>ele.ID===event.playerID)===-1){
         const player = await conn.query(getPlayer(playerID))
         playerData.push(...player[0])
